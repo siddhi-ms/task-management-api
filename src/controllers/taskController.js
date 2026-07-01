@@ -16,14 +16,7 @@ const buildTaskFilter = (req, taskId) => {
 
 const createTask = async (req, res) => {
   try {
-    const { title, description, status } = req.body || {};
-
-    if (!title) {
-      return res.status(400).json({
-        success: false,
-        message: 'Title is required',
-      });
-    }
+    const { title, description, status } = req.body;
 
     const task = await Task.create({
       title,
@@ -100,7 +93,7 @@ const getTaskById = async (req, res) => {
 
 const updateTask = async (req, res) => {
   try {
-    const { title, description, status } = req.body || {};
+    const { title, description, status } = req.body;
 
     const task = await Task.findOneAndUpdate(
       buildTaskFilter(req, req.params.id),

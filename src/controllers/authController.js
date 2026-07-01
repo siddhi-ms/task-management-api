@@ -3,14 +3,7 @@ const generateToken = require('../utils/generateToken');
 
 const register = async (req, res) => {
   try {
-    const { name, email, password, role } = req.body || {};
-
-    if (!name || !email || !password) {
-      return res.status(400).json({
-        success: false,
-        message: 'Name, email, and password are required',
-      });
-    }
+    const { name, email, password, role } = req.body;
 
     const normalizedEmail = email.toLowerCase().trim();
 
@@ -69,14 +62,7 @@ const register = async (req, res) => {
 
 const login = async (req, res) => {
   try {
-    const { email, password } = req.body || {};
-
-    if (!email || !password) {
-      return res.status(400).json({
-        success: false,
-        message: 'Email and password are required',
-      });
-    }
+    const { email, password } = req.body;
 
     const normalizedEmail = email.toLowerCase().trim();
 
