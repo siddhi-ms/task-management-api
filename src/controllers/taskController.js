@@ -36,11 +36,39 @@ const createTask = async (req, res, next) => {
 
 const getTasks = async (req, res, next) => {
   try {
-    const tasks = await Task.find(buildTaskFilter(req)).sort({ createdAt: -1 });
+    const parsedPage = Number.parseInt(req.query.page, 10);
+    const parsedLimit = Number.parseInt(req.query.limit, 10);
+
+    const page = Number.isNaN(parsedPage) || parsedPage < 1 ? 1 : parsedPage;
+    const limit = Number.isNaN(parsedLimit) || parsedLimit < 1 ? 10 : parsedLimit;
+
+    const filter = buildTaskFilter(req);
+
+    if (req.query.status) {
+      filter.status = req.query.status;
+    }
+
+    if (req.query.search) {
+      filter.title = {
+        $regex: req.query.search,
+        $options: 'i',
+      };
+    }
+
+    const totalTasks = await Task.countDocuments(filter);
+    const totalPages = totalTasks === 0 ? 0 : Math.ceil(totalTasks / limit);
+    const skip = (page - 1) * limit;
+
+    const tasks = await Task.find(filter)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
 
     return res.status(200).json({
       success: true,
-      count: tasks.length,
+      currentPage: page,
+      totalPages,
+      totalTasks,
       tasks,
     });
   } catch (error) {
