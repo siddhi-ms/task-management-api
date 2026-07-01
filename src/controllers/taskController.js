@@ -14,7 +14,7 @@ const buildTaskFilter = (req, taskId) => {
   return filter;
 };
 
-const createTask = async (req, res) => {
+const createTask = async (req, res, next) => {
   try {
     const { title, description, status } = req.body;
 
@@ -30,21 +30,11 @@ const createTask = async (req, res) => {
       task,
     });
   } catch (error) {
-    if (error.name === 'ValidationError') {
-      return res.status(400).json({
-        success: false,
-        message: error.message,
-      });
-    }
-
-    return res.status(500).json({
-      success: false,
-      message: 'Server error while creating task',
-    });
+    return next(error);
   }
 };
 
-const getTasks = async (req, res) => {
+const getTasks = async (req, res, next) => {
   try {
     const tasks = await Task.find(buildTaskFilter(req)).sort({ createdAt: -1 });
 
@@ -54,14 +44,11 @@ const getTasks = async (req, res) => {
       tasks,
     });
   } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: 'Server error while fetching tasks',
-    });
+    return next(error);
   }
 };
 
-const getTaskById = async (req, res) => {
+const getTaskById = async (req, res, next) => {
   try {
     const task = await Task.findOne(buildTaskFilter(req, req.params.id));
 
@@ -77,21 +64,11 @@ const getTaskById = async (req, res) => {
       task,
     });
   } catch (error) {
-    if (error.name === 'CastError') {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid task id',
-      });
-    }
-
-    return res.status(500).json({
-      success: false,
-      message: 'Server error while fetching task',
-    });
+    return next(error);
   }
 };
 
-const updateTask = async (req, res) => {
+const updateTask = async (req, res, next) => {
   try {
     const { title, description, status } = req.body;
 
@@ -116,28 +93,11 @@ const updateTask = async (req, res) => {
       task,
     });
   } catch (error) {
-    if (error.name === 'CastError') {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid task id',
-      });
-    }
-
-    if (error.name === 'ValidationError') {
-      return res.status(400).json({
-        success: false,
-        message: error.message,
-      });
-    }
-
-    return res.status(500).json({
-      success: false,
-      message: 'Server error while updating task',
-    });
+    return next(error);
   }
 };
 
-const deleteTask = async (req, res) => {
+const deleteTask = async (req, res, next) => {
   try {
     const task = await Task.findOneAndDelete(buildTaskFilter(req, req.params.id));
 
@@ -153,17 +113,7 @@ const deleteTask = async (req, res) => {
       message: 'Task deleted successfully',
     });
   } catch (error) {
-    if (error.name === 'CastError') {
-      return res.status(400).json({
-        success: false,
-        message: 'Invalid task id',
-      });
-    }
-
-    return res.status(500).json({
-      success: false,
-      message: 'Server error while deleting task',
-    });
+    return next(error);
   }
 };
 

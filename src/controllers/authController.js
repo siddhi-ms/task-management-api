@@ -1,7 +1,7 @@
 const User = require('../models/User');
 const generateToken = require('../utils/generateToken');
 
-const register = async (req, res) => {
+const register = async (req, res, next) => {
   try {
     const { name, email, password, role } = req.body;
 
@@ -37,30 +37,11 @@ const register = async (req, res) => {
       user: userResponse,
     });
   } catch (error) {
-    if (error.code === 11000) {
-      return res.status(409).json({
-        success: false,
-        message: 'Email already in use',
-      });
-    }
-
-    if (error.name === 'ValidationError') {
-      return res.status(400).json({
-        success: false,
-        message: error.message,
-      });
-    }
-
-    console.error('Register error:', error);
-
-    return res.status(500).json({
-      success: false,
-      message: 'Server error during registration',
-    });
+    return next(error);
   }
 };
 
-const login = async (req, res) => {
+const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
@@ -97,12 +78,7 @@ const login = async (req, res) => {
       user: userResponse,
     });
   } catch (error) {
-    console.error('Login error:', error);
-
-    return res.status(500).json({
-      success: false,
-      message: 'Server error during login',
-    });
+    return next(error);
   }
 };
 

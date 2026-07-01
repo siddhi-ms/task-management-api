@@ -6,38 +6,32 @@ const protect = async (req, res, next) => {
     const authHeader = req.headers.authorization || '';
 
     if (!authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({
-        success: false,
-        message: 'Unauthorized: token missing',
-      });
+      const error = new Error('Unauthorized: token missing');
+      error.statusCode = 401;
+      return next(error);
     }
 
     const token = authHeader.split(' ')[1];
 
     if (!token) {
-      return res.status(401).json({
-        success: false,
-        message: 'Unauthorized: token missing',
-      });
+      const error = new Error('Unauthorized: token missing');
+      error.statusCode = 401;
+      return next(error);
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     const user = await User.findById(decoded.id).select('-password');
     if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: 'Unauthorized: invalid token',
-      });
+      const error = new Error('Unauthorized: invalid token');
+      error.statusCode = 401;
+      return next(error);
     }
 
     req.user = user;
     return next();
   } catch (error) {
-    return res.status(401).json({
-      success: false,
-      message: 'Unauthorized: invalid token',
-    });
+    return next(error);
   }
 };
 
